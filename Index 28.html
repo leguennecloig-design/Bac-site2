@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un cadeau par jour jusqu'au Bac 🎁</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        /* ── PAGES ───────────────────────────────────── */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* ── HEADER ACCUEIL ──────────────────────────── */
+        header { text-align: center; padding: 40px 20px; }
+        header h1 { font-size: clamp(1.8rem,5vw,2.8rem); margin-bottom:10px; text-shadow:0 2px 10px rgba(0,0,0,.2); }
+        header p  { font-size: clamp(1rem,3vw,1.2rem); opacity:.9; }
+
+        .countdown {
+            background: rgba(255,255,255,.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px; padding: 20px; margin: 20px 0;
+            text-align: center; border: 1px solid rgba(255,255,255,.2);
+        }
+        .countdown .number { font-size:3rem; font-weight:bold; display:block; }
+
+        /* ── CADEAU DU JOUR ──────────────────────────── */
+        .today-section {
+            background:#fff; color:#333; border-radius:25px;
+            padding:30px; margin:30px 0;
+            box-shadow:0 20px 60px rgba(0,0,0,.2); text-align:center;
+        }
+        .today-section h2 { font-size:1.5rem; color:#667eea; margin-bottom:15px; }
+        .today-card {
+            background:linear-gradient(135deg,#f093fb,#f5576c);
+            color:white; padding:30px; border-radius:20px;
+            cursor:pointer; transition:transform .3s,box-shadow .3s; margin-top:20px;
+        }
+        .today-card:hover { transform:translateY(-5px); box-shadow:0 15px 40px rgba(245,87,108,.4); }
+        .today-card .gift-emoji { font-size:4rem; display:block; margin-bottom:10px; }
+        .today-card h3 { font-size:1.4rem; margin-bottom:5px; }
+
+        /* ── GRILLE ──────────────────────────────────── */
+        .archives { margin-top:40px; }
+        .archives h2 { text-align:center; font-size:1.8rem; margin-bottom:25px; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:15px; }
+        .card {
+            background:rgba(255,255,255,.95); color:#333;
+            border-radius:15px; padding:20px 15px; text-align:center;
+            cursor:pointer; transition:all .3s;
+        }
+        .card:hover { transform:translateY(-3px); box-shadow:0 10px 25px rgba(0,0,0,.2); }
+        .card.locked { background:rgba(255,255,255,.2); color:rgba(255,255,255,.7); cursor:not-allowed; }
+        .card.today-card-grid {
+            background:linear-gradient(135deg,#f093fb,#f5576c);
+            color:white; animation:pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow:0 0 0 0 rgba(245,87,108,.5); }
+            50%      { box-shadow:0 0 0 15px rgba(245,87,108,0); }
+        }
+        .card .day-number { font-size:1.8rem; font-weight:bold; display:block; }
+        .card .day-title  { font-size:.85rem; margin-top:8px; opacity:.9; }
+        .card .icon       { font-size:1.5rem; margin-top:5px; }
+
+        /* ── POPUP ───────────────────────────────────── */
+        .modal-overlay {
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,.6); backdrop-filter:blur(5px);
+            z-index:1000; justify-content:center; align-items:center; padding:20px;
+        }
+        .modal-overlay.active { display:flex; }
+        .modal {
+            background:white; color:#333; border-radius:20px;
+            padding:30px; max-width:400px; text-align:center;
+            animation:slideUp .4s;
+        }
+        @keyframes slideUp { from{transform:translateY(50px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .modal .emoji { font-size:4rem; display:block; margin-bottom:15px; }
+        .modal h3 { color:#667eea; margin-bottom:15px; }
+        .modal p  { margin-bottom:20px; line-height:1.5; }
+        .modal-btn {
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:white; border:none; padding:12px 30px;
+            border-radius:25px; font-size:1rem; cursor:pointer; transition:transform .2s;
+        }
+        .modal-btn:hover { transform:scale(1.05); }
+
+        /* ── BOUTON RETOUR ───────────────────────────── */
+        .btn-retour {
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(255,255,255,.2); color:white; border:none;
+            padding:10px 22px; border-radius:25px; font-size:.95rem;
+            cursor:pointer; margin-bottom:20px; transition:background .2s;
+        }
+        .btn-retour:hover { background:rgba(255,255,255,.35); }
+
+        /* ═══════════════════════════════════════════════
+           STYLES FICHE
+        ═══════════════════════════════════════════════ */
+        .fiche-header { text-align:center; padding:30px 20px; }
+        .fiche-header h1 { font-size:clamp(1.8rem,5vw,2.5rem); margin-bottom:10px; text-shadow:0 2px 10px rgba(0,0,0,.2); }
+        .fiche-header .subtitle { font-size:1.1rem; opacity:.9; }
+
+        .section {
+            background:#fff; color:#333; border-radius:20px;
+            padding:25px; margin:20px 0; box-shadow:0 15px 40px rgba(0,0,0,.15);
+        }
+        .section h2 { color:#667eea; font-size:1.5rem; margin-bottom:15px; padding-bottom:10px; border-bottom:3px solid #f093fb; }
+        .section h3 { color:#764ba2; font-size:1.15rem; margin:20px 0 10px; }
+        .section p  { margin-bottom:10px; }
+
+        .definition { background:linear-gradient(135deg,#e0c3fc,#8ec5fc); padding:15px 20px; border-radius:12px; margin:15px 0; border-left:5px solid #667eea; }
+        .definition .label { font-weight:bold; color:#4a3a8c; text-transform:uppercase; font-size:.85rem; letter-spacing:1px; }
+        .formula { background:linear-gradient(135deg,#fff5e1,#ffe5d9); padding:15px 20px; border-radius:12px; margin:15px 0; border-left:5px solid #f5576c; }
+        .formula .label { font-weight:bold; color:#c44569; text-transform:uppercase; font-size:.85rem; letter-spacing:1px; }
+        .example { background:#f0f4f8; padding:15px 20px; border-radius:12px; margin:15px 0; border-left:5px solid #38b6ff; }
+        .example .label { font-weight:bold; color:#1e6091; text-transform:uppercase; font-size:.85rem; letter-spacing:1px; }
+        .warning { background:#fff3cd; padding:15px 20px; border-radius:12px; margin:15px 0; border-left:5px solid #ff9f43; }
+        .warning .label { font-weight:bold; color:#b8741a; text-transform:uppercase; font-size:.85rem; letter-spacing:1px; }
+
+        .table-wrapper { overflow-x:auto; margin:15px 0; border-radius:12px; }
+        table { width:100%; border-collapse:collapse; background:white; min-width:400px; }
+        th,td { padding:12px; text-align:center; border:1px solid #e0e0e0; }
+        th { background:linear-gradient(135deg,#667eea,#764ba2); color:white; font-weight:600; }
+        tr:nth-child(even) td { background:#f8f9ff; }
+
+        .math { font-family:"Cambria Math","Times New Roman",serif; font-style:italic; font-size:1.1em; }
+        .frac { display:inline-block; vertical-align:middle; text-align:center; margin:0 3px; }
+        .frac>.num { display:block; border-bottom:1.5px solid currentColor; padding:0 4px; }
+        .frac>.den { display:block; padding:0 4px; }
+        sup { font-size:.75em; }
+        ul,ol { margin:10px 0 10px 25px; }
+        li { margin:5px 0; }
+
+        /* ── QUIZ ────────────────────────────────────── */
+        .quiz-section { background:#fff; color:#333; border-radius:20px; padding:25px; margin:30px 0; box-shadow:0 15px 40px rgba(0,0,0,.15); }
+        .quiz-section h2 { color:#f5576c; font-size:1.7rem; margin-bottom:5px; text-align:center; }
+        .quiz-section .quiz-intro { text-align:center; color:#666; margin-bottom:25px; }
+        .question { background:#f8f9ff; padding:20px; border-radius:15px; margin-bottom:15px; border-left:4px solid #667eea; }
+        .question-number { color:#f5576c; font-weight:bold; font-size:.9rem; margin-bottom:8px; }
+        .question-text { font-size:1.05rem; font-weight:500; margin-bottom:15px; color:#333; }
+        .options { display:grid; gap:10px; }
+        .option {
+            background:white; border:2px solid #e0e0e0; border-radius:10px;
+            padding:12px 15px; cursor:pointer; transition:all .2s;
+            display:flex; align-items:center; gap:12px; font-size:.98rem;
+        }
+        .option:hover    { border-color:#667eea; background:#f0f4ff; }
+        .option.selected { border-color:#667eea; background:#e8eeff; }
+        .option.correct  { border-color:#2ecc71; background:#d5f5e3; color:#196f3d; }
+        .option.incorrect{ border-color:#e74c3c; background:#fadbd8; color:#922b21; }
+        .option-letter {
+            background:#667eea; color:white; width:28px; height:28px;
+            border-radius:50%; display:flex; align-items:center; justify-content:center;
+            font-weight:bold; font-size:.85rem; flex-shrink:0;
+        }
+        .option.correct .option-letter  { background:#2ecc71; }
+        .option.incorrect .option-letter{ background:#e74c3c; }
+
+        .submit-btn {
+            display:block; margin:30px auto 10px;
+            background:linear-gradient(135deg,#f093fb,#f5576c);
+            color:white; border:none; padding:15px 40px; border-radius:30px;
+            font-size:1.1rem; font-weight:bold; cursor:pointer; transition:transform .2s;
+            box-shadow:0 10px 25px rgba(245,87,108,.3);
+        }
+        .submit-btn:hover    { transform:translateY(-2px); }
+        .submit-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+        .result {
+            display:none; text-align:center; margin-top:30px; padding:30px;
+            background:linear-gradient(135deg,#f093fb,#f5576c);
+            color:white; border-radius:20px;
+        }
+        .result.show { display:block; animation:slideUp .5s; }
+        .result .score { font-size:3.5rem; font-weight:bold; display:block; margin:10px 0; }
+        .result .message { font-size:1.2rem; margin-top:10px; }
+        .retry-btn {
+            margin-top:20px; background:white; color:#f5576c; border:none;
+            padding:12px 30px; border-radius:25px; font-size:1rem;
+            font-weight:bold; cursor:pointer; transition:transform .2s;
+        }
+        .retry-btn:hover { transform:scale(1.05); }
+
+        footer { text-align:center; padding:30px 20px; opacity:.8; font-size:.9rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ════════════════════════════════════════════
+         PAGE ACCUEIL
+    ════════════════════════════════════════════ -->
+    <div class="page active" id="page-accueil">
+        <header>
+            <h1>🎁 Un cadeau par jour jusqu'au Bac</h1>
+            <p>Une fiche de révision chaque matin pour réussir ensemble !</p>
+        </header>
+
+        <div class="countdown">
+            <span class="number" id="daysLeft">--</span>
+            <span>jours avant le Bac 💪</span>
+        </div>
+
+        <section class="today-section">
+            <h2>✨ Le cadeau du jour ✨</h2>
+            <div class="today-card" id="todayCard">
+                <span class="gift-emoji">🎁</span>
+                <h3 id="todayTitle">Chargement...</h3>
+                <p id="todayDate"></p>
+            </div>
+        </section>
+
+        <section class="archives">
+            <h2>📚 Toutes les fiches</h2>
+            <div class="grid" id="grid"></div>
+        </section>
+
+        <footer><p>Fait avec 💜 pour la promo · Bon courage à tous !</p></footer>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         PAGE FICHE — DÉRIVATION (18/05)
+    ════════════════════════════════════════════ -->
+    <div class="page" id="page-derivation">
+        <button class="btn-retour" onclick="afficherPage('accueil')">← Retour à l'accueil</button>
+
+        <div class="fiche-header">
+            <h1>📐 Dérivation</h1>
+            <p class="subtitle">Fiche du 18/05 · Première · Maths</p>
+        </div>
+
+        <section class="section">
+            <h2>1. Définitions clés</h2>
+            <div class="definition">
+                <span class="label">📌 Fonction dérivable</span>
+                <p>Une fonction <span class="math">f</span> est <strong>dérivable sur un intervalle I</strong> si elle est dérivable en tout point de l'intérieur de I.</p>
+                <p>La <strong>fonction dérivée</strong> est notée <span class="math">f'</span> : <span class="math">x ↦ f'(x)</span>.</p>
+            </div>
+            <div class="definition">
+                <span class="label">📌 Notation de Leibniz</span>
+                <p>Si <span class="math">y = f(x)</span>, on note aussi :</p>
+                <p style="text-align:center;font-size:1.2em;margin:10px 0">
+                    <span class="frac"><span class="num">dy</span><span class="den">dx</span></span> pour <span class="math">f'(x)</span>
+                </p>
+            </div>
+            <div class="definition">
+                <span class="label">📌 Taux d'accroissement</span>
+                <p style="text-align:center;font-size:1.15em;margin:10px 0">
+                    <span class="math">f'(a) = </span>
+                    <span style="font-size:1.3em">lim<sub style="font-size:.6em">h→0</sub></span>
+                    <span class="frac"><span class="num">f(a+h) − f(a)</span><span class="den">h</span></span>
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>2. Dérivées des fonctions usuelles ⭐</h2>
+            <div class="formula"><span class="label">🎯 À connaître par cœur</span></div>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>f(x)</th><th>f'(x)</th><th>Intervalle</th></tr></thead>
+                    <tbody>
+                        <tr><td><span class="math">k</span> (constante)</td><td><span class="math">0</span></td><td>ℝ</td></tr>
+                        <tr><td><span class="math">x</span></td><td><span class="math">1</span></td><td>ℝ</td></tr>
+                        <tr><td><span class="math">x²</span></td><td><span class="math">2x</span></td><td>ℝ</td></tr>
+                        <tr><td><span class="math">x³</span></td><td><span class="math">3x²</span></td><td>ℝ</td></tr>
+                        <tr><td><span class="math">xⁿ</span> (n ∈ ℤ)</td><td><span class="math">n·xⁿ⁻¹</span></td><td>ℝ (ou ℝ* si n&lt;0)</td></tr>
+                        <tr><td><span class="frac"><span class="num">1</span><span class="den"><span class="math">x</span></span></span></td><td><span class="frac"><span class="num">−1</span><span class="den"><span class="math">x²</span></span></span></td><td>ℝ*</td></tr>
+                        <tr><td><span class="frac"><span class="num">1</span><span class="den"><span class="math">x²</span></span></span></td><td><span class="frac"><span class="num">−2</span><span class="den"><span class="math">x³</span></span></span></td><td>ℝ*</td></tr>
+                        <tr><td><span class="math">√x</span></td><td><span class="frac"><span class="num">1</span><span class="den">2<span class="math">√x</span></span></span></td><td>]0 ; +∞[</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="warning">
+                <span class="label">⚠️ Piège classique</span>
+                <p><span class="math">√x</span> n'est <strong>PAS dérivable en 0</strong> (la dérivée tend vers +∞).</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>3. Opérations sur les dérivées 🔧</h2>
+            <div class="formula"><span class="label">🎯 Les 5 règles à maîtriser</span></div>
+
+            <h3>① Somme</h3>
+            <p style="text-align:center;font-size:1.15em"><span class="math">(u + v)' = u' + v'</span></p>
+
+            <h3>② Produit par une constante</h3>
+            <p style="text-align:center;font-size:1.15em"><span class="math">(k·u)' = k·u'</span></p>
+
+            <h3>③ Produit</h3>
+            <p style="text-align:center;font-size:1.15em"><span class="math">(u·v)' = u'·v + u·v'</span></p>
+
+            <h3>④ Inverse</h3>
+            <p style="text-align:center;font-size:1.15em">
+                <span class="math">(</span><span class="frac"><span class="num">1</span><span class="den">v</span></span><span class="math">)' = </span><span class="frac"><span class="num">−v'</span><span class="den">v²</span></span>
+            </p>
+
+            <h3>⑤ Quotient</h3>
+            <p style="text-align:center;font-size:1.15em">
+                <span class="math">(</span><span class="frac"><span class="num">u</span><span class="den">v</span></span><span class="math">)' = </span><span class="frac"><span class="num">u'·v − u·v'</span><span class="den">v²</span></span>
+            </p>
+
+            <div class="warning">
+                <span class="label">⚠️ Attention</span>
+                <p>Pour ④ et ⑤ : <strong>v ne doit pas s'annuler</strong> sur l'intervalle.</p>
+                <p>Dans le quotient c'est <span class="math">u'v − uv'</span> (signe <strong>MOINS</strong> !), pas +.</p>
+            </div>
+
+            <h3>⑥ Composée affine</h3>
+            <div class="formula">
+                <p>Si <span class="math">f(x) = g(ax + b)</span> alors <span class="math">f'(x) = a · g'(ax + b)</span></p>
+            </div>
+            <div class="example">
+                <span class="label">💡 Exemple</span>
+                <p>Soit <span class="math">f(x) = 2x³ − 6x − 4</span></p>
+                <p><span class="math">f'(x) = 6x² − 6</span></p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>4. Variations & extremums 📊</h2>
+            <div class="definition">
+                <span class="label">📌 Lien dérivée ↔ variations</span>
+                <ul>
+                    <li><span class="math">f'(x) > 0</span> ⟺ <span class="math">f</span> strictement <strong>croissante</strong></li>
+                    <li><span class="math">f'(x) &lt; 0</span> ⟺ <span class="math">f</span> strictement <strong>décroissante</strong></li>
+                    <li><span class="math">f'(x) = 0</span> ⟺ <span class="math">f</span> <strong>constante</strong></li>
+                </ul>
+            </div>
+            <div class="definition">
+                <span class="label">📌 Extremum local</span>
+                <p><span class="math">f</span> admet un extremum local en <span class="math">a</span> ⟺ <span class="math">f'</span> <strong>s'annule ET change de signe</strong> en <span class="math">a</span>.</p>
+            </div>
+            <div class="warning">
+                <span class="label">⚠️ Piège majeur</span>
+                <p><span class="math">f'(a) = 0</span> n'implique <strong>PAS</strong> forcément un extremum !</p>
+                <p>Ex : <span class="math">f(x) = x³</span> → <span class="math">f'(0) = 0</span> mais pas d'extremum (f strictement croissante).</p>
+            </div>
+            <div class="example">
+                <span class="label">💡 Méthode</span>
+                <ol>
+                    <li>Calculer <span class="math">f'(x)</span></li>
+                    <li>Résoudre <span class="math">f'(x) = 0</span></li>
+                    <li>Étudier le signe de <span class="math">f'(x)</span></li>
+                    <li>Dresser le tableau de variations</li>
+                    <li>Extremums = là où <span class="math">f'</span> <strong>change de signe</strong></li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- QUIZ -->
+        <section class="quiz-section">
+            <h2>🎯 Quiz — 20 questions</h2>
+            <p class="quiz-intro">Teste tes connaissances ! Sélectionne une réponse par question.</p>
+            <div id="questions"></div>
+            <button class="submit-btn" id="submitBtn" onclick="checkAnswers()">Voir mon score ✨</button>
+            <div class="result" id="result">
+                <p>Ton score :</p>
+                <span class="score" id="scoreDisplay">--/20</span>
+                <p class="message" id="resultMessage"></p>
+                <button class="retry-btn" onclick="resetQuiz()">🔄 Recommencer</button>
+            </div>
+        </section>
+
+        <footer><p>Fiche de révision · Bon courage 💜</p></footer>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         AJOUTE TES PROCHAINES FICHES ICI
+         Copie ce bloc et change l'id + le contenu
+    ════════════════════════════════════════════
+    <div class="page" id="page-philo">
+        <button class="btn-retour" onclick="afficherPage('accueil')">← Retour à l'accueil</button>
+        ... ton cours + quiz philo ...
+    </div>
+    -->
+
+</div><!-- /container -->
+
+<!-- POPUP jours futurs -->
+<div class="modal-overlay" id="modal">
+    <div class="modal">
+        <span class="emoji">🤫</span>
+        <h3>Pas de triche !</h3>
+        <p id="modalMessage"></p>
+        <button class="modal-btn" onclick="closeModal()">OK, je patiente !</button>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// ⚙️ CONFIGURATION — modifie uniquement cette section !
+// ============================================================
+
+const DATE_BAC   = new Date(2026, 5, 16);  // 16 juin 2026
+const DATE_DEBUT = new Date(2026, 4, 18);  // 18 mai 2026
+
+// Pour chaque fiche :
+//   title  = titre sur la carte
+//   pageId = id de la div page correspondante (sans "page-")
+//   emoji  = icône dans la grille
+const FICHES = [
+    { title: "Maths — Dérivées", pageId: "derivation", emoji: "📐" },
+    // Décommente et complète au fur et à mesure 👇
+    // { title: "Philo — La conscience",    pageId: "philo",    emoji: "🧠" },
+    // { title: "Histoire — Guerre froide", pageId: "histoire", emoji: "🌍" },
+    // { title: "SVT — Génétique",          pageId: "svt",      emoji: "🧬" },
+    // { title: "Physique — Ondes",         pageId: "physique", emoji: "⚡" },
+];
+
+// ============================================================
+// 🔧 LOGIQUE (ne pas toucher)
+// ============================================================
+
+function resetHeure(d) { const r=new Date(d); r.setHours(0,0,0,0); return r; }
+function joursEntre(a,b) { return Math.round((resetHeure(b)-resetHeure(a))/864e5); }
+function formatDate(d) { return d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}); }
+
+const aujourdhui    = resetHeure(new Date());
+const indexJour     = joursEntre(DATE_DEBUT, aujourdhui);
+const joursAvantBac = joursEntre(aujourdhui, DATE_BAC);
+
+document.getElementById('daysLeft').textContent = joursAvantBac > 0 ? joursAvantBac : 0;
+
+function afficherPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function ouvrirFiche(fiche, index) {
+    const dateFiche = new Date(DATE_DEBUT);
+    dateFiche.setDate(dateFiche.getDate() + index);
+    if (index <= indexJour) {
+        afficherPage(fiche.pageId);
+    } else {
+        afficherPopup(dateFiche);
+    }
+}
+
+function afficherCadeauDuJour() {
+    const titre = document.getElementById('todayTitle');
+    const dateEl = document.getElementById('todayDate');
+    const card   = document.getElementById('todayCard');
+    if (indexJour < 0) {
+        titre.textContent  = "Bientôt disponible !";
+        dateEl.textContent = "Premier cadeau le " + formatDate(DATE_DEBUT);
+        card.onclick = () => {};
+    } else if (indexJour >= FICHES.length) {
+        titre.textContent  = "Tous les cadeaux ont été distribués 🎓";
+        dateEl.textContent = "Bonne chance pour le Bac !";
+        card.onclick = () => {};
+    } else {
+        const fiche = FICHES[indexJour];
+        titre.textContent  = fiche.title;
+        dateEl.textContent = "Clique pour ouvrir 📖";
+        card.onclick = () => ouvrirFiche(fiche, indexJour);
+    }
+}
+
+function afficherGrille() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    FICHES.forEach((fiche, i) => {
+        const dateFiche = new Date(DATE_DEBUT);
+        dateFiche.setDate(dateFiche.getDate() + i);
+        const card = document.createElement('div');
+        if (i < indexJour) {
+            card.className = 'card';
+            card.innerHTML = `<span class="day-number">J${i+1}</span><div class="day-title">${fiche.title}</div><div class="icon">${fiche.emoji||'📄'}</div>`;
+            card.onclick = () => ouvrirFiche(fiche, i);
+        } else if (i === indexJour) {
+            card.className = 'card today-card-grid';
+            card.innerHTML = `<span class="day-number">J${i+1}</span><div class="day-title">${fiche.title}</div><div class="icon">🎁</div>`;
+            card.onclick = () => ouvrirFiche(fiche, i);
+        } else {
+            card.className = 'card locked';
+            card.innerHTML = `<span class="day-number">J${i+1}</span><div class="day-title">???</div><div class="icon">🔒</div>`;
+            card.onclick = () => afficherPopup(dateFiche);
+        }
+        grid.appendChild(card);
+    });
+}
+
+function afficherPopup(dateCible) {
+    document.getElementById('modalMessage').textContent = `Reviens le ${formatDate(dateCible)} pour découvrir ton cadeau 🎁`;
+    document.getElementById('modal').classList.add('active');
+}
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
+document.getElementById('modal').addEventListener('click', e => { if(e.target.id==='modal') closeModal(); });
+
+// ── QUIZ ─────────────────────────────────────────────────────
+const quiz = [
+    { q:"Quelle est la dérivée de f(x) = x² ?",                                   options:["x","2x","x²/2","2"],                                                              correct:1 },
+    { q:"Quelle est la dérivée de f(x) = 1/x sur ℝ* ?",                           options:["1/x²","−1/x²","−1/x","ln(x)"],                                                    correct:1 },
+    { q:"Quelle est la dérivée de f(x) = √x sur ]0;+∞[ ?",                        options:["1/√x","2√x","1/(2√x)","√x/2"],                                                    correct:2 },
+    { q:"Quelle est la dérivée de f(x) = x⁵ ?",                                   options:["5x⁴","x⁴","5x⁶","4x⁵"],                                                          correct:0 },
+    { q:"Quelle est la dérivée d'une fonction constante f(x) = 7 ?",              options:["7","x","1","0"],                                                                   correct:3 },
+    { q:"Quelle est la formule de la dérivée d'un produit (uv)' ?",               options:["u'v'","u'+v'","u'v+uv'","u'v−uv'"],                                               correct:2 },
+    { q:"Quelle est la formule de la dérivée d'un quotient (u/v)' ?",             options:["(u'v+uv')/v²","(u'v−uv')/v²","u'/v'","(u'−v')/v²"],                              correct:1 },
+    { q:"Quelle est la dérivée de f(x) = 3x² + 5x − 2 ?",                        options:["6x+5","3x+5","6x²+5","6x+5x"],                                                    correct:0 },
+    { q:"Quelle est la dérivée de f(x) = 1/x² sur ℝ* ?",                         options:["−1/x³","2/x³","−2/x³","1/(2x)"],                                                  correct:2 },
+    { q:"Si f'(x) > 0 sur un intervalle I, alors f est :",                        options:["décroissante","croissante","constante","non définie"],                             correct:1 },
+    { q:"Quelle est la dérivée de f(x) = 4x³ − 2x ?",                            options:["12x²−2","4x²−2","12x³−2","12x²+2"],                                               correct:0 },
+    { q:"Soit f(x) = (2x+3)⁵. En utilisant la composée affine, f'(x) = ?",       options:["5(2x+3)⁴","10(2x+3)⁴","2(2x+3)⁴","(2x+3)⁴"],                                    correct:1 },
+    { q:"Si f admet un extremum local en a et f est dérivable en a, alors :",     options:["f(a)=0","f'(a)=0","f''(a)=0","f'(a)>0"],                                          correct:1 },
+    { q:"Pour f(x) = x³, on a f'(0) = 0. Que peut-on dire ?",                    options:["max en 0","min en 0","pas d'extremum en 0","non dérivable en 0"],                  correct:2 },
+    { q:"Quelle est la dérivée de f(x) = 5x⁴ ?",                                 options:["20x³","5x³","20x⁴","4x³"],                                                        correct:0 },
+    { q:"Quelle est la dérivée de (k·u)' avec k ∈ ℝ ?",                          options:["k","u'","k·u'","k+u'"],                                                           correct:2 },
+    { q:"Quelle est la dérivée de f(x) = (x²+1)(x−3) ?",                         options:["2x(x−3)","2x(x−3)+(x²+1)","x²+1","2x"],                                          correct:1 },
+    { q:"Quelle est la dérivée de f(x) = x/(x+1) sur ℝ\\{−1} ?",                options:["1/(x+1)²","(x+1)/(x+1)²","1/(x+1)","−1/(x+1)²"],                                 correct:0 },
+    { q:"f admet un extremum local en a si et seulement si f' :",                 options:["est positive en a","est nulle en a uniquement","s'annule ET change de signe en a","est négative en a"], correct:2 },
+    { q:"Quelle est la dérivée de f(x) = 2x⁷ − x³ + 4x − 9 ?",                 options:["14x⁶−3x²+4","2x⁶−3x²+4","14x⁶−x²+4","14x⁷−3x²+4"],                              correct:0 },
+];
+
+let userAnswers = new Array(quiz.length).fill(null);
+let quizFinished = false;
+
+function renderQuiz() {
+    const container = document.getElementById('questions');
+    container.innerHTML = '';
+    quiz.forEach((item, qi) => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        div.innerHTML = `
+            <div class="question-number">Question ${qi+1} / 20</div>
+            <div class="question-text">${item.q}</div>
+            <div class="options" id="options-${qi}">
+                ${item.options.map((opt,oi)=>`
+                    <div class="option" data-q="${qi}" data-o="${oi}">
+                        <span class="option-letter">${String.fromCharCode(65+oi)}</span>
+                        <span>${opt}</span>
+                    </div>`).join('')}
+            </div>`;
+        container.appendChild(div);
+    });
+    document.querySelectorAll('.option').forEach(opt => {
+        opt.addEventListener('click', function() {
+            if (quizFinished) return;
+            const qi = parseInt(this.dataset.q), oi = parseInt(this.dataset.o);
+            document.querySelectorAll(`#options-${qi} .option`).forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            userAnswers[qi] = oi;
+        });
+    });
+}
+
+function checkAnswers() {
+    let score = 0;
+    quizFinished = true;
+    quiz.forEach((item, qi) => {
+        const ua = userAnswers[qi];
+        document.querySelectorAll(`#options-${qi} .option`).forEach((opt, oi) => {
+            opt.classList.remove('selected');
+            if (oi === item.correct) opt.classList.add('correct');
+            else if (oi === ua) opt.classList.add('incorrect');
+        });
+        if (ua === item.correct) score++;
+    });
+    document.getElementById('scoreDisplay').textContent = `${score} / 20`;
+    document.getElementById('resultMessage').textContent =
+        score===20 ? '🏆 Parfait ! Tu maîtrises tout !' :
+        score>=17  ? '🌟 Excellent ! Tu es prêt(e) !' :
+        score>=14  ? '👏 Très bien ! Encore un petit effort.' :
+        score>=10  ? '💪 Pas mal, mais il faut réviser encore !' :
+        score>=6   ? '📚 Allez, on relit la fiche et on recommence !' :
+                     '🔄 Courage, recommence après avoir bien relu le cours.';
+    document.getElementById('result').classList.add('show');
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('result').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function resetQuiz() {
+    userAnswers = new Array(quiz.length).fill(null);
+    quizFinished = false;
+    document.getElementById('result').classList.remove('show');
+    document.getElementById('submitBtn').disabled = false;
+    renderQuiz();
+    document.querySelector('.quiz-section').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Init
+afficherCadeauDuJour();
+afficherGrille();
+renderQuiz();
+</script>
+</body>
+</html>
