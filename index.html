@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un cadeau par jour jusqu'au Bac 🎁 — Révise avec plaisir</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --purple: #667eea;
+            --violet: #764ba2;
+            --pink: #f093fb;
+            --coral: #f5576c;
+            --white: #ffffff;
+            --text: #2d2d2d;
+            --muted: #6b7280;
+            --bg-light: #f8f7ff;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ── NAVBAR ──────────────────────────────────────── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(255,255,255,.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(102,126,234,.12);
+            padding: 14px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo {
+            font-weight: 800; font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--purple), var(--coral));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-cta {
+            background: linear-gradient(135deg, var(--purple), var(--violet));
+            color: white; border: none; padding: 9px 22px; border-radius: 25px;
+            font-size: .9rem; font-weight: 600; cursor: pointer; text-decoration: none;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(102,126,234,.4); }
+
+        /* ── HERO ─────────────────────────────────────────── */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--purple) 0%, var(--violet) 50%, var(--coral) 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 100px 24px 60px;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.08) 0%, transparent 60%),
+                        radial-gradient(ellipse at 70% 80%, rgba(245,87,108,.15) 0%, transparent 60%);
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+            color: white; padding: 8px 18px; border-radius: 25px;
+            font-size: .85rem; font-weight: 500; margin-bottom: 28px;
+            backdrop-filter: blur(8px);
+        }
+        .hero-badge span { font-size: 1rem; }
+        .hero h1 {
+            font-size: clamp(2.2rem, 6vw, 4rem);
+            font-weight: 900; color: white; line-height: 1.15;
+            max-width: 820px; text-shadow: 0 4px 20px rgba(0,0,0,.15);
+            margin-bottom: 20px;
+        }
+        .hero h1 em {
+            font-style: normal;
+            background: linear-gradient(90deg, #fff, #f9d7ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: rgba(255,255,255,.88); max-width: 560px;
+            line-height: 1.65; margin-bottom: 40px;
+        }
+        .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+        .btn-primary {
+            background: white; color: var(--purple);
+            border: none; padding: 16px 36px; border-radius: 30px;
+            font-size: 1.05rem; font-weight: 700; cursor: pointer;
+            text-decoration: none; transition: transform .25s, box-shadow .25s;
+            box-shadow: 0 10px 30px rgba(0,0,0,.2);
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,.25); }
+        .btn-secondary {
+            background: rgba(255,255,255,.15); color: white;
+            border: 2px solid rgba(255,255,255,.4); padding: 14px 30px; border-radius: 30px;
+            font-size: 1.05rem; font-weight: 600; cursor: pointer;
+            text-decoration: none; transition: background .2s; backdrop-filter: blur(8px);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,.25); }
+
+        .hero-stats {
+            margin-top: 56px;
+            display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat .value { font-size: 2rem; font-weight: 800; color: white; }
+        .hero-stat .label { font-size: .85rem; color: rgba(255,255,255,.75); margin-top: 3px; }
+
+        /* ── SECTION GÉNÉRIQUE ──────────────────────────── */
+        section { padding: 90px 24px; }
+        .section-inner { max-width: 1080px; margin: 0 auto; }
+        .section-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(102,126,234,.1), rgba(118,75,162,.1));
+            color: var(--purple); padding: 6px 16px; border-radius: 20px;
+            font-size: .8rem; font-weight: 700; letter-spacing: .5px;
+            text-transform: uppercase; margin-bottom: 14px;
+        }
+        .section-title {
+            font-size: clamp(1.7rem, 4vw, 2.6rem);
+            font-weight: 800; line-height: 1.2; margin-bottom: 14px;
+        }
+        .section-title em {
+            font-style: normal;
+            background: linear-gradient(135deg, var(--purple), var(--coral));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .section-sub { font-size: 1.05rem; color: var(--muted); max-width: 540px; line-height: 1.6; }
+
+        /* ── COMMENT ÇA MARCHE ──────────────────────────── */
+        .how-it-works { background: var(--bg-light); }
+        .steps {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 28px; margin-top: 50px;
+        }
+        .step {
+            background: white; border-radius: 20px; padding: 32px 26px;
+            box-shadow: 0 4px 20px rgba(102,126,234,.08);
+            position: relative; border: 1px solid rgba(102,126,234,.08);
+            transition: transform .25s, box-shadow .25s;
+        }
+        .step:hover { transform: translateY(-4px); box-shadow: 0 12px 35px rgba(102,126,234,.15); }
+        .step-number {
+            width: 46px; height: 46px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--purple), var(--violet));
+            color: white; font-weight: 800; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 18px;
+        }
+        .step h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+        .step p { font-size: .95rem; color: var(--muted); line-height: 1.6; }
+
+        /* ── FEATURES ────────────────────────────────────── */
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px; margin-top: 50px;
+        }
+        .feature-card {
+            background: white; border-radius: 20px; padding: 28px;
+            border: 1px solid rgba(102,126,234,.1);
+            box-shadow: 0 2px 12px rgba(0,0,0,.04);
+            transition: transform .25s, box-shadow .25s;
+        }
+        .feature-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(102,126,234,.12); }
+        .feature-icon {
+            font-size: 2.2rem; margin-bottom: 14px; display: block;
+        }
+        .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+        .feature-card p { font-size: .93rem; color: var(--muted); line-height: 1.6; }
+
+        /* ── PREVIEW ──────────────────────────────────────── */
+        .preview { background: linear-gradient(135deg, var(--purple) 0%, var(--violet) 100%); }
+        .preview .section-title, .preview .section-sub { color: white; }
+        .preview .section-title em {
+            background: linear-gradient(90deg, #fff, #f9d7ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .preview .section-sub { color: rgba(255,255,255,.8); }
+        .preview-cards {
+            display: flex; gap: 18px; margin-top: 50px;
+            flex-wrap: wrap; justify-content: center;
+        }
+        .preview-card {
+            background: rgba(255,255,255,.12); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,.2); border-radius: 18px;
+            padding: 22px 18px; min-width: 130px; text-align: center;
+            color: white; transition: transform .2s, background .2s;
+            cursor: default;
+        }
+        .preview-card:hover { transform: translateY(-4px); background: rgba(255,255,255,.2); }
+        .preview-card.today {
+            background: linear-gradient(135deg, var(--pink), var(--coral));
+            border-color: transparent;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        .preview-card .day-num { font-size: 1.6rem; font-weight: 800; display: block; }
+        .preview-card .day-label { font-size: .78rem; margin-top: 6px; opacity: .85; }
+        .preview-card .day-icon { font-size: 1.4rem; margin-top: 6px; display: block; }
+        .preview-card.locked { opacity: .5; cursor: not-allowed; }
+        .preview-card.locked:hover { transform: none; }
+
+        /* ── MATIÈRES ────────────────────────────────────── */
+        .subjects { background: var(--bg-light); }
+        .subjects-grid {
+            display: flex; flex-wrap: wrap; gap: 12px;
+            margin-top: 40px;
+        }
+        .subject-pill {
+            display: flex; align-items: center; gap: 10px;
+            background: white; border: 1px solid rgba(102,126,234,.15);
+            border-radius: 50px; padding: 10px 20px;
+            font-size: .95rem; font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,.04);
+            transition: transform .2s, box-shadow .2s;
+        }
+        .subject-pill:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(102,126,234,.15); }
+        .subject-pill .pill-icon { font-size: 1.2rem; }
+
+        /* ── TESTIMONIALS ────────────────────────────────── */
+        .testimonials-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 22px; margin-top: 50px;
+        }
+        .testi-card {
+            background: white; border-radius: 20px; padding: 28px;
+            border: 1px solid rgba(102,126,234,.1);
+            box-shadow: 0 4px 18px rgba(0,0,0,.05);
+        }
+        .testi-stars { color: #fbbf24; font-size: 1.1rem; margin-bottom: 14px; letter-spacing: 2px; }
+        .testi-quote { font-size: .97rem; color: #444; line-height: 1.65; margin-bottom: 18px; }
+        .testi-author { display: flex; align-items: center; gap: 12px; }
+        .testi-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--coral));
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1rem; flex-shrink: 0;
+        }
+        .testi-name { font-weight: 700; font-size: .95rem; }
+        .testi-role { font-size: .82rem; color: var(--muted); margin-top: 2px; }
+
+        /* ── CTA FINAL ───────────────────────────────────── */
+        .cta-section {
+            background: linear-gradient(135deg, var(--purple) 0%, var(--coral) 100%);
+            text-align: center; padding: 100px 24px;
+        }
+        .cta-section h2 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            font-weight: 900; color: white; margin-bottom: 16px;
+        }
+        .cta-section p { color: rgba(255,255,255,.85); font-size: 1.1rem; max-width: 500px; margin: 0 auto 40px; line-height: 1.6; }
+        .cta-btn {
+            display: inline-block; background: white; color: var(--purple);
+            border: none; padding: 18px 44px; border-radius: 35px;
+            font-size: 1.1rem; font-weight: 800; cursor: pointer;
+            text-decoration: none; transition: transform .25s, box-shadow .25s;
+            box-shadow: 0 10px 35px rgba(0,0,0,.2);
+        }
+        .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 18px 50px rgba(0,0,0,.28); }
+        .cta-note { margin-top: 18px; font-size: .85rem; color: rgba(255,255,255,.65); }
+
+        /* ── FOOTER ──────────────────────────────────────── */
+        footer {
+            background: #1a1a2e; color: rgba(255,255,255,.6);
+            padding: 40px 24px; text-align: center; font-size: .88rem;
+        }
+        footer .footer-logo {
+            font-size: 1.3rem; font-weight: 800; color: white; margin-bottom: 10px;
+        }
+        footer a { color: rgba(255,255,255,.5); text-decoration: none; }
+        footer a:hover { color: white; }
+
+        /* ── UTILITIES ───────────────────────────────────── */
+        .text-center { text-align: center; }
+        .mt-2 { margin-top: 8px; }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.95rem; }
+            .hero-stats { gap: 24px; }
+            .hero-actions { flex-direction: column; align-items: center; }
+            .btn-primary, .btn-secondary { width: 100%; max-width: 280px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ──────────────────────────────────────────── -->
+<nav>
+    <div class="nav-logo">🎁 CadeauBac</div>
+    <a href="Index 28.html" class="nav-cta">Commencer à réviser →</a>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<section class="hero">
+    <div class="hero-badge"><span>🎓</span> Spécial Bac 2027 — Promo Terminale</div>
+    <h1>Révise <em>avec plaisir</em>,<br>un cadeau par jour</h1>
+    <p>Chaque matin, une nouvelle fiche de révision à débloquer — clés du cours, formules, exercices corrigés et quiz interactif.</p>
+    <div class="hero-actions">
+        <a href="Index 28.html" class="btn-primary">🎁 Ouvrir le cadeau du jour</a>
+        <a href="#comment" class="btn-secondary">Comment ça marche ?</a>
+    </div>
+    <div class="hero-stats">
+        <div class="hero-stat">
+            <div class="value">29</div>
+            <div class="label">fiches de révision</div>
+        </div>
+        <div class="hero-stat">
+            <div class="value">580+</div>
+            <div class="label">questions de quiz</div>
+        </div>
+        <div class="hero-stat">
+            <div class="value">100%</div>
+            <div class="label">gratuit &amp; sans compte</div>
+        </div>
+    </div>
+</section>
+
+<!-- ── COMMENT ÇA MARCHE ────────────────────────────────── -->
+<section class="how-it-works" id="comment">
+    <div class="section-inner">
+        <div class="text-center">
+            <span class="section-tag">🔍 Le concept</span>
+            <h2 class="section-title">Comment ça <em>marche</em> ?</h2>
+            <p class="section-sub" style="margin:0 auto">Aussi simple qu'un calendrier de l'Avent, mais pour le Bac.</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Tu débloques chaque jour</h3>
+                <p>Une nouvelle fiche se déverrouille chaque matin à partir de la date de début. Pas de triche, le suspense est réel !</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Tu révises le cours en 15 min</h3>
+                <p>Définitions clés, formules essentielles, exemples résolus et pièges à éviter — tout ce qu'il faut, rien de superflu.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Tu valides avec le quiz</h3>
+                <p>20 questions par fiche pour tester ce que tu as retenu. Score immédiat, correction détaillée, recommencer si besoin.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Tu arrives confiant au Bac</h3>
+                <p>En quelques semaines tu auras couvert toutes les matières clés. La régularité fait toute la différence.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────────────────────── -->
+<section id="features">
+    <div class="section-inner">
+        <div class="text-center">
+            <span class="section-tag">✨ Fonctionnalités</span>
+            <h2 class="section-title">Tout ce dont tu as <em>besoin</em></h2>
+            <p class="section-sub" style="margin:0 auto">Conçu pour réviser efficacement sans se perdre dans des centaines de ressources.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">📐</span>
+                <h3>Fiches synthétiques</h3>
+                <p>L'essentiel du cours distillé en une page. Définitions, formules, exemples et pièges classiques — zéro remplissage.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🎯</span>
+                <h3>Quiz interactif 20 questions</h3>
+                <p>Chaque fiche inclut un quiz de 20 questions avec correction immédiate et score pour mesurer ta progression.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🔒</span>
+                <h3>Déverrouillage quotidien</h3>
+                <p>Le rythme est donné : une fiche par jour pour ne jamais se retrouver dépassé avant le grand jour.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📱</span>
+                <h3>100% mobile</h3>
+                <p>Révise dans le bus, dans la cour, dans ta chambre. L'interface s'adapte à tous les écrans, sans appli à installer.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🆓</span>
+                <h3>Gratuit, sans inscription</h3>
+                <p>Pas de compte, pas d'email, pas d'abonnement. Tu arrives, tu révises, tu files. C'est tout.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">⏱️</span>
+                <h3>Compte à rebours Bac</h3>
+                <p>Le nombre de jours restants s'affiche en permanence pour rester motivé et garder le cap sur l'objectif.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── PREVIEW ───────────────────────────────────────────── -->
+<section class="preview">
+    <div class="section-inner text-center">
+        <span class="section-tag" style="background:rgba(255,255,255,.15);color:white">📅 Calendrier</span>
+        <h2 class="section-title">Un cadeau à débloquer <em>chaque matin</em></h2>
+        <p class="section-sub" style="margin:0 auto">Les fiches passées restent disponibles à tout moment. La fiche du jour brille — les suivantes patientent.</p>
+        <div class="preview-cards">
+            <div class="preview-card">
+                <span class="day-num">J1</span>
+                <span class="day-icon">📐</span>
+                <span class="day-label">Dérivées</span>
+            </div>
+            <div class="preview-card">
+                <span class="day-num">J2</span>
+                <span class="day-icon">🧠</span>
+                <span class="day-label">La conscience</span>
+            </div>
+            <div class="preview-card today">
+                <span class="day-num">J3</span>
+                <span class="day-icon">🎁</span>
+                <span class="day-label">Aujourd'hui !</span>
+            </div>
+            <div class="preview-card locked">
+                <span class="day-num">J4</span>
+                <span class="day-icon">🔒</span>
+                <span class="day-label">???</span>
+            </div>
+            <div class="preview-card locked">
+                <span class="day-num">J5</span>
+                <span class="day-icon">🔒</span>
+                <span class="day-label">???</span>
+            </div>
+            <div class="preview-card locked">
+                <span class="day-num">J6</span>
+                <span class="day-icon">🔒</span>
+                <span class="day-label">???</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── MATIÈRES ──────────────────────────────────────────── -->
+<section class="subjects" id="matieres">
+    <div class="section-inner">
+        <div class="text-center">
+            <span class="section-tag">📚 Matières</span>
+            <h2 class="section-title">Toutes les matières <em>du Bac</em></h2>
+            <p class="section-sub" style="margin:0 auto">Des fiches pour chaque matière, réparties intelligemment sur les semaines précédant l'examen.</p>
+        </div>
+        <div class="subjects-grid" style="margin-top:44px">
+            <div class="subject-pill"><span class="pill-icon">📐</span> Mathématiques</div>
+            <div class="subject-pill"><span class="pill-icon">🧠</span> Philosophie</div>
+            <div class="subject-pill"><span class="pill-icon">🌍</span> Histoire-Géo</div>
+            <div class="subject-pill"><span class="pill-icon">🧬</span> SVT</div>
+            <div class="subject-pill"><span class="pill-icon">⚡</span> Physique-Chimie</div>
+            <div class="subject-pill"><span class="pill-icon">🇫🇷</span> Français</div>
+            <div class="subject-pill"><span class="pill-icon">🇬🇧</span> Langues</div>
+            <div class="subject-pill"><span class="pill-icon">💰</span> SES</div>
+            <div class="subject-pill"><span class="pill-icon">🎨</span> Spécialités</div>
+            <div class="subject-pill"><span class="pill-icon">💻</span> NSI</div>
+        </div>
+    </div>
+</section>
+
+<!-- ── TESTIMONIALS ──────────────────────────────────────── -->
+<section id="avis">
+    <div class="section-inner">
+        <div class="text-center">
+            <span class="section-tag">💬 Ils témoignent</span>
+            <h2 class="section-title">La promo qui <em>réussit</em></h2>
+            <p class="section-sub" style="margin:0 auto">Ce qu'ils ont dit après avoir suivi les révisions au quotidien.</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testi-card">
+                <div class="testi-stars">★★★★★</div>
+                <p class="testi-quote">« Je galérais à me motiver pour réviser. Avec le cadeau du jour j'avais une raison de m'y mettre chaque matin. Le quiz après le cours c'est vraiment top pour voir si on a compris. »</p>
+                <div class="testi-author">
+                    <div class="testi-avatar">L</div>
+                    <div>
+                        <div class="testi-name">Léa</div>
+                        <div class="testi-role">Terminale · Mention Bien</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testi-card">
+                <div class="testi-stars">★★★★★</div>
+                <p class="testi-quote">« Franchement les fiches sont ultra claires, y'a exactement ce qu'il faut. J'ai eu 17 en maths grâce à la fiche dérivées, j'avais tout revu la veille. »</p>
+                <div class="testi-author">
+                    <div class="testi-avatar">T</div>
+                    <div>
+                        <div class="testi-name">Tom</div>
+                        <div class="testi-role">Terminale · 17/20 en Maths</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testi-card">
+                <div class="testi-stars">★★★★★</div>
+                <p class="testi-quote">« C'est simple, c'est efficace, c'est gratuit. J'avais peur du Bac de philo mais la fiche m'a donné un vrai plan de révision. J'ai eu 15, je suis trop contente ! »</p>
+                <div class="testi-author">
+                    <div class="testi-avatar">C</div>
+                    <div>
+                        <div class="testi-name">Camille</div>
+                        <div class="testi-role">Terminale · 15/20 en Philo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA FINAL ─────────────────────────────────────────── -->
+<section class="cta-section">
+    <h2>Prêt(e) à réussir ton Bac ?</h2>
+    <p>Rejoins la promo, débloque ton premier cadeau et commence à réviser dès aujourd'hui.</p>
+    <a href="Index 28.html" class="cta-btn">🎁 Ouvrir mon premier cadeau</a>
+    <p class="cta-note">Gratuit · Sans compte · Sans pub</p>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+    <div class="footer-logo">🎁 CadeauBac</div>
+    <p>Fait avec 💜 pour la promo · Bon courage à tous !</p>
+    <p class="mt-2"><a href="Index 28.html">Accéder aux fiches →</a></p>
+</footer>
+
+</body>
+</html>
